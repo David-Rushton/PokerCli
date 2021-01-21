@@ -25,34 +25,21 @@ namespace PokerCli
 {
     public class Hand
     {
-        List<Card> _communityCards;
-
-        List<Card> _holeCards;
-
-        List<Card> _cards;
+        readonly List<Card> _cards = new ();
 
 
-        public void AddHoleCards(IEnumerable<Card> holeCards)
-        {
-            Debug.Assert(holeCards.Count() == 2, $"Expected 2 hole cards.  Actual {holeCards.Count()}.");
+        public Hand()
+        { }
 
-            _communityCards = new List<Card>();
-            _holeCards = new List<Card>(holeCards);
-            RefreshCards();
-        }
-
-        public void AddFlopCards(IEnumerable<Card> flopCards)
-        {
-            _communityCards = new List<Card>(flopCards);
-            RefreshCards();
-        }
-
-        public void AddTurnCard(Card turnCard) => AddCommunityCard(turnCard, 3);
-
-        public void AddRiverCard(Card riverCard) => AddCommunityCard(riverCard, 4);
+        public Hand(IEnumerable<Card> cards) => _cards.AddRange(cards);
 
 
-        // TODO: Why don't I have unit tests!?
+        public void AddCard(Card card) => _cards.Add(card);
+
+        public void AddCards(IEnumerable<Card> cards) => _cards.AddRange(cards);
+
+        public void Clear() => _cards.Clear();
+
         public IEnumerable<Card> GetBestHand()
         {
             var cardsByRank = GetCardsByRank();
@@ -144,23 +131,7 @@ namespace PokerCli
         }
 
 
-
-        private void AddCommunityCard(Card card, int expectedCommunityCardCount)
-        {
-            Debug.Assert
-                (
-                    _communityCards.Count == expectedCommunityCardCount,
-                    $"Expected {expectedCommunityCardCount} community cards.  Actual {_communityCards.Count}."
-                )
-            ;
-
-            _communityCards.Add(card);
-            RefreshCards();
-        }
-
-        private void RefreshCards() => _cards = _communityCards.Union(_holeCards).ToList();
-
-        public IEnumerable<(Card firstCard, Card secondCard)> Pairs =>
+        private IEnumerable<(Card firstCard, Card secondCard)> Pairs =>
             from card in _cards
             join cardRank in GetCardsByRank() on card.Rank equals cardRank.rank
             where cardRank.count == 2
@@ -168,7 +139,7 @@ namespace PokerCli
             select (cardRankGroup.First(), cardRankGroup.Last())
         ;
 
-        public IEnumerable<(Card firstCard, Card secondCard)> FourOfAKind =>
+        private IEnumerable<(Card firstCard, Card secondCard)> FourOfAKind =>
             from card in _cards
             join cardRank in GetCardsByRank() on card.Rank equals cardRank.rank
             where cardRank.count == 4

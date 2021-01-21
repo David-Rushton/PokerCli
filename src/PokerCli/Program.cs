@@ -23,22 +23,22 @@ namespace PokerCli
 
 
 
-            var deck = new Deck();
-            var communityCards = new List<Card>(deck.Deal(5));
-            var holeCards = new List<Card>(deck.Deal(2));
+            // var deck = new Deck();
+            // var communityCards = new List<Card>(deck.Deal(5));
+            // var holeCards = new List<Card>(deck.Deal(2));
 
-            var hand = new Hand();
-            hand.AddHoleCards(holeCards);
-            hand.AddFlopCards(communityCards.Take(3));
-            hand.AddTurnCard(communityCards.Skip(3).Take(1).First());
-            hand.AddRiverCard(communityCards.Skip(4).Take(1).First());
+            // var hand = new Hand();
+            // hand.AddHoleCards(holeCards);
+            // hand.AddFlopCards(communityCards.Take(3));
+            // hand.AddTurnCard(communityCards.Skip(3).Take(1).First());
+            // hand.AddRiverCard(communityCards.Skip(4).Take(1).First());
 
 
-            var bestHand = hand.GetBestHand();
+            // var bestHand = hand.GetBestHand();
 
-            Console.WriteLine($"Community: {string.Join(", ", communityCards)}");
-            Console.WriteLine($"Hole:      {string.Join(", ", holeCards)}");
-            Console.WriteLine($"Best hand: {string.Join(", ", bestHand)}");
+            // Console.WriteLine($"Community: {string.Join(", ", communityCards)}");
+            // Console.WriteLine($"Hole:      {string.Join(", ", holeCards)}");
+            // Console.WriteLine($"Best hand: {string.Join(", ", bestHand)}");
         }
     }
 }
