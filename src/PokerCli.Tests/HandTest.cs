@@ -19,7 +19,7 @@ namespace PokerCli.Tests
 
         public static IEnumerable<Object[]> StraightFlush()
         {
-            var straightFlush = GetCards( new []{"TH", "JH", "QH", "KH", "AH"} );
+            var straightFlush = GetCards( new []{"9H", "TH", "JH", "QH", "KH"} );
 
             yield return new object[] { GetCards( new []{"9H", "KH", "QH", "JH", "TH", "4C", "7D"} ), straightFlush };
             yield return new object[] { GetCards( new []{"KH", "QH", "JH", "TH", "4C", "7D", "9H"} ), straightFlush };
@@ -27,23 +27,41 @@ namespace PokerCli.Tests
 
         public static IEnumerable<Object[]> FourOfAKind()
         {
-            var fourOfAKind = GetCards( new []{"AH", "AC", "AD", "AS"} );
+            var fourOfAKindWithKicker = GetCards( new []{"AH", "AC", "AD", "AS", "7S"} );
 
-            yield return new object[] { GetCards( new []{"AH", "AC", "AD", "AS", "3D", "7S"} ), fourOfAKind };
-            yield return new object[] { GetCards( new []{"7S", "KH", "QH", "JH", "TH", "3D"} ), fourOfAKind };
+            yield return new object[] { GetCards( new []{"AH", "AC", "AD", "AS", "3D", "7S"} ), fourOfAKindWithKicker };
+            yield return new object[] { GetCards( new []{"7S", "AH", "AC", "AD", "AS", "3D"} ), fourOfAKindWithKicker };
         }
+
+        public static IEnumerable<Object[]> FullHouse()
+        {
+            var fullHouse = GetCards( new []{"7H", "7D", "7S", "2C", "2H"} );
+
+            yield return new object[] { GetCards( new []{"7H", "7D", "7S", "2C", "2H", "AD", "8S"} ), fullHouse };
+            yield return new object[] { GetCards( new []{"7H", "7D", "7S", "8S", "2C", "AD", "2H"} ), fullHouse };
+            yield return new object[] { GetCards( new []{"7H", "7D", "7S", "2H", "2D", "2S", "9C"} ), fullHouse };
+        }
+
 
         [Theory]
         [MemberData(nameof(RoyalFlush))]
         [MemberData(nameof(StraightFlush))]
         [MemberData(nameof(FourOfAKind))]
+        [MemberData(nameof(FullHouse))]
         public void Hand_ReturnsBestHand(IEnumerable<Card> allCards, IEnumerable<Card> expectedHand)
         {
             var hand = new Hand(allCards);
-            var actualHand = hand.GetBestHand();
+            var actualHand = SortHand(hand.GetBestHand());
 
             // TODO: Implement compare
-            Assert.Equal(expectedHand, actualHand);
+            Assert.Equal(SortHand(expectedHand), actualHand);
+
+
+            IEnumerable<Card> SortHand(IEnumerable<Card> cards) =>
+                from card in cards
+                orderby card.RankValue descending, card.Suit
+                select card
+            ;
         }
 
 
@@ -75,7 +93,7 @@ namespace PokerCli.Tests
                     'Q' => CardRank.Queen,
                     'J' => CardRank.Jack,
                     'T' => CardRank.Ten,
-                    _   => (CardRank)((int)rank)
+                    _   => (CardRank)int.Parse(rank.ToString())
                 }
             ;
         }
