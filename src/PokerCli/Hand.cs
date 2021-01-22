@@ -59,22 +59,32 @@ namespace PokerCli
                 if(straight.isFlush)
                     return straight.straight;
 
-
                 straightAvailable = true;
             }
 
 
             // four of a kind
-            // TODO: add kicker
             if(fourOfAKind.Count() == 1)
-                return _cards.Where(c => c.Rank == fourOfAKind.First().rank);
+                return AddKickers(_cards.Where(c => c.Rank == fourOfAKind.First().rank), 1);
 
 
-            // full house
-            if(threeOfAKindSorted.Count() > 0 && pairsSorted.Count() > 0)
+            // full house a
+            if(threeOfAKindSorted.Count() == 2)
             {
                 var threeRank = threeOfAKindSorted.First().rank;
-                var pairRank = threeOfAKindSorted.First().rank;
+                var twoRank = threeOfAKindSorted.Last().rank;
+                var threeOfAKind = _cards.Where(c => c.Rank == threeRank);
+                var pair = _cards.Where(c => c.Rank == twoRank).Take(2);
+
+                return threeOfAKind.Union(pair);
+            }
+
+
+            // full house b
+            if(threeOfAKindSorted.Count() == 1 && pairsSorted.Count() > 0)
+            {
+                var threeRank = threeOfAKindSorted.First().rank;
+                var pairRank = pairsSorted.First().rank;
 
                 return _cards.Where(c => c.Rank == threeRank || c.Rank == pairRank);
             }
@@ -127,7 +137,12 @@ namespace PokerCli
 
 
 
-
+            IEnumerable<Card> AddKickers(IEnumerable<Card> cards, int kickerCount) =>
+                cards.Union
+                (
+                    _cards.Except(cards).OrderBy(c => c.Suit).ThenBy(c => c.RankValue).Take(kickerCount)
+                )
+            ;
         }
 
 
@@ -161,12 +176,12 @@ namespace PokerCli
             )
         ;
 
-        private bool TryGetStraight(out (Card[] straight, bool isFlush, bool isRoyal) bestStraight)
+        private bool TryGetStraight(out (Card[] straight, Card highCard, bool isFlush, bool isRoyal) bestStraight)
         {
             bestStraight =
                 (
                     from straight in GetStraights()
-                    orderby straight.isRoyal, straight.isFlush
+                    orderby straight.isRoyal, straight.isFlush, straight.highCard.RankValue descending
                     select straight
                 ).FirstOrDefault()
             ;
@@ -174,7 +189,7 @@ namespace PokerCli
             return bestStraight.straight is not null;
         }
 
-        private IEnumerable<(Card[] straight, bool isFlush, bool isRoyal)> GetStraights()
+        private IEnumerable<(Card[] straight, Card highCard, bool isFlush, bool isRoyal)> GetStraights()
         {
             // hand is sorted by value.
             // duplicate rank values (ace, 2, 3, etc) are merged.
@@ -210,8 +225,9 @@ namespace PokerCli
                             var straight = sortedHand[new Range(startCard, startCard + 5)];
                             var isFlush = straight.GroupBy(c => c.Suit).Count() == 1;
                             var isRoyal = isFlush && straight.Last().Rank == CardRank.Ace;
+                            var highCard = straight.OrderBy(c => c.RankValue).Last();
 
-                            yield return (straight, isFlush, isRoyal);
+                            yield return (straight, highCard, isFlush, isRoyal);
                         }
                     }
         }
