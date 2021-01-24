@@ -23,6 +23,21 @@ using System.Linq;
 
 namespace PokerCli
 {
+    public enum HandValue
+    {
+        HightCard,
+        Pair,
+        TwoPairs,
+        ThreeOfAKind,
+        Straight,
+        Flush,
+        FullHouse,
+        FourOfAKind,
+        StraightFlush,
+        RoyalFlush
+    }
+
+
     public class Hand
     {
         readonly List<Card> _cards = new ();
@@ -40,7 +55,7 @@ namespace PokerCli
 
         public void Clear() => _cards.Clear();
 
-        public IEnumerable<Card> GetBestHand()
+        public BestHand GetBestHand()
         {
             var cardsByRank = GetCardsByRank();
             var cardsBySuit = GetCardsBySuit();
@@ -54,10 +69,10 @@ namespace PokerCli
             if(TryGetStraight(out var straight))
             {
                 if(straight.isRoyal)
-                    return straight.straight;
+                    return new BestHand(HandValue.RoyalFlush, straight.straight);
 
                 if(straight.isFlush)
-                    return straight.straight;
+                    return new BestHand(HandValue.StraightFlush, straight.straight);
 
                 straightAvailable = true;
             }
@@ -65,8 +80,10 @@ namespace PokerCli
 
             // four of a kind
             if(fourOfAKind.Count() == 1)
-                return AddKickers(_cards.Where(c => c.Rank == fourOfAKind.First().rank), 1);
-
+            {
+                var hand = AddKickers(_cards.Where(c => c.Rank == fourOfAKind.First().rank), 1);
+                return new BestHand(HandValue.FourOfAKind, hand);
+            }
 
             // full house a
             if(threeOfAKindSorted.Count() == 2)
@@ -76,7 +93,7 @@ namespace PokerCli
                 var threeOfAKind = _cards.Where(c => c.Rank == threeRank);
                 var pair = _cards.Where(c => c.Rank == twoRank).Take(2);
 
-                return threeOfAKind.Union(pair);
+                return new BestHand(HandValue.ThreeOfAKind, threeOfAKind.Union(pair));
             }
 
 
@@ -85,55 +102,59 @@ namespace PokerCli
             {
                 var threeRank = threeOfAKindSorted.First().rank;
                 var pairRank = pairsSorted.First().rank;
+                var hand = _cards.Where(c => c.Rank == threeRank || c.Rank == pairRank);
 
-                return _cards.Where(c => c.Rank == threeRank || c.Rank == pairRank);
+                return new BestHand(HandValue.ThreeOfAKind, hand);
             }
 
 
             // flush
             var greatestSuitByCount = cardsBySuit.OrderByDescending(cbs => cbs.Count).First();
             if(greatestSuitByCount.Count >= 5)
-                return _cards.Where(c => c.Suit == greatestSuitByCount.suit).OrderByDescending(c => c.RankValue);
+            {
+                var hand = _cards.Where(c => c.Suit == greatestSuitByCount.suit).OrderByDescending(c => c.RankValue);
+                return new BestHand(HandValue.Flush, hand);
+            }
 
 
             // straight
             if(straightAvailable)
-                return straight.straight;
+                return new BestHand(HandValue.Straight, straight.straight);
 
 
             // three of a kind
-            // TODO: add kickers
             if(threeOfAKindSorted.Count() > 0)
             {
                 var threeRank = threeOfAKindSorted.First().rank;
+                var hand = AddKickers(_cards.Where(c => c.Rank == threeRank), 2);
 
-                return _cards.Where(c => c.Rank == threeRank);
+                return new BestHand(HandValue.ThreeOfAKind, hand);
             }
 
 
             // two pairs
-            // TODO: add kickers
             if(pairsSorted.Count() == 2)
             {
                 var bestPair = pairsSorted.First().rank;
                 var nextPair = pairsSorted.Skip(1).First().rank;
+                var hand = AddKickers(_cards.Where(c => c.Rank == bestPair || c.Rank == nextPair), 1);
 
-                return _cards.Where(c => c.Rank == bestPair || c.Rank == nextPair);
+                return new BestHand(HandValue.TwoPairs, hand);
             }
 
-            // airs
-            // TODO: add kickers
+            // pair
             if(pairsSorted.Count() == 1)
             {
                 var bestPair = pairsSorted.First().rank;
+                var hand = AddKickers(_cards.Where(c => c.Rank == bestPair), 3);
 
-                return _cards.Where(c => c.Rank == bestPair);
+                return new BestHand(HandValue.Pair, hand);
             }
 
 
 
-            // high card + kickers
-            return _cards.OrderByDescending(c => c.RankValue).Take(5);
+            // high card + 4 kickers, which is the 5 highest cards by rank value
+            return new BestHand(HandValue.HightCard, _cards.OrderByDescending(c => c.RankValue).Take(5));
 
 
 
@@ -233,22 +254,3 @@ namespace PokerCli
         }
     }
 }
-
-
-
-/*
-    ---------------------
-    Hand value
-    ---------------------
-    10 - Royal flush*
-     9 - Straight flush*
-     8 - Four of a kind*            ++ kicker
-     7 - Full house*
-     6 - Flush
-     5 - Straight
-     4 - Three of a Kind            ++ kickers
-     3 - Two Pairs                  ++ kicker
-     2 - Pair                       ++ kickers
-     1 - High card                  ++ kickers
-    ---------------------
-*/
