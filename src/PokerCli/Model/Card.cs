@@ -31,7 +31,6 @@ namespace PokerCli.Model
 
     public record Card(CardSuit Suit, CardRank Rank)
     {
-        // should I test this?
         public int RankValue => (int)Rank;
 
 
