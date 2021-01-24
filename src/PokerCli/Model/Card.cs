@@ -29,12 +29,9 @@ namespace PokerCli.Model
     }
 
 
-    public record Card
-    (
-        CardSuit Suit,
-        CardRank Rank
-    )
+    public record Card(CardSuit Suit, CardRank Rank)
     {
+        // should I test this?
         public int RankValue => (int)Rank;
 
 
@@ -91,14 +88,7 @@ namespace PokerCli.Model
             };
 
 
-            return (shortSuit) switch
-            {
-                // TODO: Fix odd whitespace here
-                "♥" => $"{shortSuit}{shortRank}",
-                "♠" => $"{shortSuit}{shortRank}",
-                "♦" => $"{shortSuit}{shortRank}",
-                _   => $"{shortSuit}{shortRank}",
-            };
+            return $"{shortRank}{shortSuit}";
         }
     }
 }
