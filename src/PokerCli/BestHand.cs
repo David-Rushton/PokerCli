@@ -9,7 +9,7 @@ namespace PokerCli
 {
     public record BestHand : IComparable
     {
-        public BestHand(HandValue value, IEnumerable<Card> cards)
+        public BestHand(HandValue value, List<Card> cards)
         {
             Debug.Assert(cards.Count() == 5, "A hand must be comprised of 5 cards");
 
@@ -23,10 +23,11 @@ namespace PokerCli
 
         public int Score { get; init; }
 
-        public IEnumerable<Card> Cards { get; init; }
+        public List<Card> Cards { get; init; }
 
 
         // requires test
+        // TODO: value is required in check
         public int CompareTo(object other) =>
             (other as BestHand) switch
             {
@@ -36,11 +37,13 @@ namespace PokerCli
             }
         ;
 
+        // TODO: value is required in check
         public virtual bool Equals(BestHand other) =>
-            other.Score == Score
+            other.Score == this.Score
         ;
 
-        public override int GetHashCode() => Score;
+        // TODO: value is _maybe_ needed here.
+        public override int GetHashCode() => this.Score;
 
         public override string ToString() =>
             string.Format
@@ -64,11 +67,14 @@ namespace PokerCli
             // last card is *least* significant.  it is multiplied by 1.
             // penultimate is next leaste.  it is multiplied by 100.
             // we add two zeros for each subsequent card.  the first card is multiplied by 100,000,000.
+
+            // TODO: ahem.  we don't do this.
             // finally the hand value is multiplied by 10,000,000,000 and added to the result.
+
             // example.  pair with kicker: 3H 3D, AD, 10S, 5S =   20,303,141,005
             // hand value is assigned the highest multiplier to ensure a pair is never beaten by a lesser hand (high card).
             // multiplying by position ensures high value kickers cannot overwhelm the pair cards.
-            foreach(var card in Cards)
+            foreach(var card in Cards.Reverse<Card>())
             {
                 value += card.RankValue * multiplier;
                 multiplier *= 100;
