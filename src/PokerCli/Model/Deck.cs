@@ -11,17 +11,22 @@ namespace PokerCli.Model
         readonly List<Card> _deck = new();
 
 
+        public int RemainingCards => _deck.Count;
+
+
         public IEnumerable<Card> Deal(int numberOfCards)
         {
             for(var i = 0; i < numberOfCards; i++)
                 yield return NextCard();
         }
 
+        public void Shuffle() => RefillDeck();
+
 
         private Card NextCard()
         {
             if(_deck.Count == 0)
-                RefillDeck();
+                throw new Exception("The deck is empty.  All cards have been dealt.");
 
 
             var nextCardIndex = new Random().Next(0, _deck.Count);
@@ -31,8 +36,11 @@ namespace PokerCli.Model
             return nextCard;
         }
 
+        // TODO: Why rebuild this time and time again?
         private void RefillDeck()
         {
+            _deck.Clear();
+
             for(var i = 0; i < 52; i++)
                 _deck.Add(new Card(GetSuit(i), GetRank(i)));
 
