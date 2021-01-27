@@ -39,11 +39,11 @@ namespace PokerCli
 
         // TODO: value is required in check
         public virtual bool Equals(BestHand other) =>
-            other.Score == this.Score
+            other.Value == this.Value && other.Score == this.Score
         ;
 
         // TODO: value is _maybe_ needed here.
-        public override int GetHashCode() => this.Score;
+        public override int GetHashCode() => (this.Value, this.Score).GetHashCode();
 
         public override string ToString() =>
             string.Format
