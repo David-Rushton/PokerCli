@@ -9,52 +9,20 @@ namespace PokerCli.Tests
 {
     public class HandTests
     {
-/*
-        public static IEnumerable<Object[]> RoyalFlush()
-        {
-            var royalFlush = new BestHand(HandValue.RoyalFlush, GetCards( new []{"TH", "JH", "QH", "KH", "AH"} ));
-
-            yield return new object[] { GetCards( new []{"AH", "KH", "QH", "JH", "TH", "4C", "7D"} ), royalFlush };
-            yield return new object[] { GetCards( new []{"KH", "QH", "JH", "TH", "4C", "7D", "AH"} ), royalFlush };
-        }
-
-        public static IEnumerable<Object[]> StraightFlush()
-        {
-            var straightFlush = GetCards( new []{"9H", "TH", "JH", "QH", "KH"} );
-
-            yield return new object[] { GetCards( new []{"9H", "KH", "QH", "JH", "TH", "4C", "7D"} ), straightFlush };
-            yield return new object[] { GetCards( new []{"KH", "QH", "JH", "TH", "4C", "7D", "9H"} ), straightFlush };
-        }
-
-        public static IEnumerable<Object[]> FourOfAKind()
-        {
-        }
-
+        [Theory]
+        [InlineData(new [] { "TH", "JH", "QH", "KH", "AH" }, new [] { "AH", "KH", "QH", "JH", "TH", "4C", "7D" }, HandValue.RoyalFlush)]
+        [InlineData(new [] { "TH", "JH", "QH", "KH", "AH" }, new [] { "KH", "QH", "JH", "TH", "4C", "7D", "AH" }, HandValue.RoyalFlush)]
+        public void Hand_ShouldReturnRoyalFlush(string[] expectedCards, string[] allCards, HandValue expectedValue) =>
+            TestHandActualMatchesExpectations(expectedCards, allCards, expectedValue)
+        ;
 
         [Theory]
-        [MemberData(nameof(RoyalFlush))]
-        public void Hand_ShouldReturnRoyalFlush(IEnumerable<Card> allCards, BestHand expectedHand)
-        {
-            var hand = new Hand(allCards);
-            var actualHand = hand.GetBestHand();
+        [InlineData(new [] { "9H", "TH", "JH", "QH", "KH" }, new [] { "9H", "KH", "QH", "JH", "TH", "4C", "7D" }, HandValue.StraightFlush)]
+        [InlineData(new [] { "9H", "TH", "JH", "QH", "KH" }, new [] { "KH", "QH", "JH", "TH", "4C", "8H", "9H" }, HandValue.StraightFlush)]
+        public void Hand_ShouldReturnStraightFlush(string[] expectedCards, string[] allCards, HandValue expectedValue) =>
+            TestHandActualMatchesExpectations(expectedCards, allCards, expectedValue)
+        ;
 
-            Assert.Equal(expectedHand.Value, HandValue.RoyalFlush);
-            Assert.Equal(expectedHand, actualHand);
-        }
-
-        [Theory]
-        [MemberData(nameof(StraightFlush))]
-        // [MemberData(nameof(FourOfAKind))]
-        // [MemberData(nameof(FullHouse))]
-        public void Hand_ShouldReturnStraightFlush(IEnumerable<Card> allCards, BestHand expectedHand)
-        {
-            var hand = new Hand(allCards);
-            var actualHand = hand.GetBestHand();
-
-            Assert.Equal(expectedHand.Value, HandValue.StraightFlush);
-            Assert.Equal(expectedHand, actualHand);
-        }
-*/
 
         [Theory]
         [InlineData(new [] { "AH", "AC", "AD", "AS", "7S" }, new [] { "AC", "AH", "AD", "AS", "3D", "7S", "2H" }, HandValue.FourOfAKind)]
@@ -76,6 +44,41 @@ namespace PokerCli.Tests
         [InlineData(new [] { "KC", "JC", "9C", "6C", "2C" }, new [] { "KC", "JC", "9C", "6C", "6D", "7H", "2C" }, HandValue.Flush)]
         [InlineData(new [] { "8C", "7C", "6C", "5C", "3C" }, new [] { "8C", "7C", "6C", "5C", "3C", "2C", "1C" }, HandValue.Flush)]
         public void Hand_ShouldReturnFlush(string[] expectedCards, string[] allCards, HandValue expectedValue) =>
+            TestHandActualMatchesExpectations(expectedCards, allCards, expectedValue)
+        ;
+
+        [Theory]
+        [InlineData(new [] { "2C", "3C", "4D", "5S", "6H" }, new [] { "5S", "6H", "AH", "3D", "2C", "3C", "4D" }, HandValue.Flush)]
+        [InlineData(new [] { "4H", "5C", "6C", "7D", "8S" }, new [] { "TH", "AS", "5C", "4H", "7D", "6C", "8S" }, HandValue.Flush)]
+        public void Hand_ShouldReturnStraight(string[] expectedCards, string[] allCards, HandValue expectedValue) =>
+            TestHandActualMatchesExpectations(expectedCards, allCards, expectedValue)
+        ;
+
+        [Theory]
+        [InlineData(new [] { "8C", "8H", "8S", "TH", "4H" }, new [] { "8C", "2S", "8H", "8S", "4H", "3S", "TH" }, HandValue.ThreeOfAKind)]
+        [InlineData(new [] { "9C", "9H", "9S", "TH", "4H" }, new [] { "9C", "2S", "9S", "4H", "TH", "3S", "9H" }, HandValue.ThreeOfAKind)]
+        public void Hand_ShouldReturnThreeOfAKind(string[] expectedCards, string[] allCards, HandValue expectedValue) =>
+            TestHandActualMatchesExpectations(expectedCards, allCards, expectedValue)
+        ;
+
+        [Theory]
+        [InlineData(new [] { "5H", "5D", "3S", "3H", "7D" }, new [] { "6S", "5H", "5D", "3S", "3H", "7D", "2S" }, HandValue.ThreeOfAKind)]
+        [InlineData(new [] { "9S", "9D", "5S", "5H", "3C" }, new [] { "2D", "9S", "9D", "5S", "5H", "3C", "2C" }, HandValue.ThreeOfAKind)]
+        public void Hand_ShouldReturnTwoPair(string[] expectedCards, string[] allCards, HandValue expectedValue) =>
+            TestHandActualMatchesExpectations(expectedCards, allCards, expectedValue)
+        ;
+
+        [Theory]
+        [InlineData(new [] { "6D", "6H", "9H", "7C", "4S" }, new [] { "6D", "6H", "9H", "7C", "4S", "3H", "2C" }, HandValue.Pair)]
+        [InlineData(new [] { "AS", "AC", "TD", "8D", "5S" }, new [] { "AC", "AS", "TD", "8D", "5S", "4C", "2C" }, HandValue.Pair)]
+        public void Hand_ShouldReturnPair(string[] expectedCards, string[] allCards, HandValue expectedValue) =>
+            TestHandActualMatchesExpectations(expectedCards, allCards, expectedValue)
+        ;
+
+        [Theory]
+        [InlineData(new [] { "QH", "JS", "TH", "8S", "6S" }, new [] { "QH", "6S", "2C", "8S", "TH", "JS", "3D" }, HandValue.HightCard)]
+        [InlineData(new [] { "KS", "JS", "9D", "7H", "5D" }, new [] { "7H", "5D", "3S", "9D", "JS", "KS", "2H" }, HandValue.HightCard)]
+        public void Hand_ShouldReturnHighCard(string[] expectedCards, string[] allCards, HandValue expectedValue) =>
             TestHandActualMatchesExpectations(expectedCards, allCards, expectedValue)
         ;
 
