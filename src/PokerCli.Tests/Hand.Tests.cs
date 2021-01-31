@@ -96,7 +96,7 @@ namespace PokerCli.Tests
         private static IEnumerable<Card> GetCards(string[] cards)
         {
             foreach (var card in cards)
-                yield return new Card(GetSuit(card[1]), GetRank(card[0]));
+                yield return new Card(GetRank(card[0]), GetSuit(card[1]));
 
 
             CardSuit GetSuit(char suit) =>
@@ -106,19 +106,34 @@ namespace PokerCli.Tests
                     'C' => CardSuit.Clubs,
                     'D' => CardSuit.Diamonds,
                     'S' => CardSuit.Spades,
-                    _   => throw new Exception($"Suit not supported: {suit}")
+
+                    _ => throw new Exception($"Suit not supported: {suit}")
                 }
             ;
 
             CardRank GetRank(char rank) =>
+                new CardRank(GetRankSymbol(rank))
+            ;
+
+            CardRankSymbol GetRankSymbol(char rank) =>
                 (rank) switch
                 {
-                    'A' => CardRank.Ace,
-                    'K' => CardRank.King,
-                    'Q' => CardRank.Queen,
-                    'J' => CardRank.Jack,
-                    'T' => CardRank.Ten,
-                    _   => (CardRank)int.Parse(rank.ToString())
+
+                    '2' => CardRankSymbol.Two,
+                    '3' => CardRankSymbol.Three,
+                    '4' => CardRankSymbol.Four,
+                    '5' => CardRankSymbol.Five,
+                    '6' => CardRankSymbol.Six,
+                    '7' => CardRankSymbol.Seven,
+                    '8' => CardRankSymbol.Eight,
+                    '9' => CardRankSymbol.Nine,
+                    'T' => CardRankSymbol.Ten,
+                    'J' => CardRankSymbol.Jack,
+                    'Q' => CardRankSymbol.Queen,
+                    'K' => CardRankSymbol.King,
+                    'A' => CardRankSymbol.Ace,
+
+                    _ => throw new Exception($"Rank not supported: {rank}")
                 }
             ;
         }
