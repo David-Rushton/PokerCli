@@ -1,93 +1,75 @@
 using System;
 
+
 namespace PokerCli.Model
 {
-    public enum CardSuit
+    public record Card(CardRank Rank, CardSuit Suit)
     {
-        Hearts,
-        Spades,
-        Diamonds,
-        Clubs
-    }
+        const char _suitHearts = '♥';
+
+        const char _suitSpades = '♠';
+
+        const char _suitDiamonds = '♦';
+
+        const char _suitClubs = '♣';
 
 
-    public enum CardRank
-    {
-        Two = 2,
-        Three = 3,
-        Four = 4,
-        Five = 5,
-        Six = 6,
-        Seven = 7,
-        Eight = 8,
-        Nine = 9,
-        Ten = 10,
-        Jack = 11,
-        Queen = 12,
-        King = 13,
-        Ace = 14
-    }
+        public string PrettyPrint() =>
+            string.Format
+            (
+                "\u001b[1;{0}{1}{2}\u001b[0m",
+                GetAnsiSuitColourCode(),
+                ConvertFromRank(),
+                ConvertFromSuit()
+            )
+        ;
+
+        public override string ToString() =>
+            string.Format
+            (
+                "{0}{1}",
+                ConvertFromRank(),
+                ConvertFromSuit()
+            )
+        ;
 
 
-    public record Card(CardSuit Suit, CardRank Rank)
-    {
-        public int RankValue => (int)Rank;
+        // https://en.wikipedia.org/wiki/ANSI_escape_code
+        private string GetAnsiSuitColourCode() =>
+            this.Suit is CardSuit.Hearts or CardSuit.Diamonds ? "31m" : "36m"
+        ;
 
-
-        // TODO: 🤮 let's refactor this later.
-        public string ToString(bool withFormat)
-        {
-            var shortRank = (Rank) switch
+        private char ConvertFromSuit() =>
+            (this.Suit) switch
             {
-                CardRank.Jack => "J",
-                CardRank.Queen => "Q",
-                CardRank.King => "K",
-                CardRank.Ace => "A",
-                _ => ((int)Rank).ToString()
-            };
+                CardSuit.Hearts     => _suitHearts,
+                CardSuit.Spades     => _suitSpades,
+                CardSuit.Diamonds   => _suitDiamonds,
+                CardSuit.Clubs      => _suitClubs,
 
-            // TODO: Fix odd whitespace here .
-            var shortSuit = (Suit) switch
+                _ => throw new Exception($"Cannot convert from card.  Suit not recognised: {this.Suit}.")
+            }
+        ;
+
+        private char ConvertFromRank() =>
+            (this.Rank.Symbol) switch
             {
-                CardSuit.Hearts => "♥",
-                CardSuit.Spades => "♠",
-                CardSuit.Diamonds => "♦",
-                _ => "♣"
-            };
+                CardRankSymbol.Two    => '2',
+                CardRankSymbol.Three  => '3',
+                CardRankSymbol.Four   => '4',
+                CardRankSymbol.Five   => '5',
+                CardRankSymbol.Six    => '6',
+                CardRankSymbol.Seven  => '7',
+                CardRankSymbol.Eight  => '8',
+                CardRankSymbol.Nine   => '9',
+                CardRankSymbol.Ten    => 'T',
+                CardRankSymbol.Jack   => 'J',
+                CardRankSymbol.Queen  => 'Q',
+                CardRankSymbol.King   => 'K',
+                CardRankSymbol.Ace    => 'A',
 
-
-            return (shortSuit) switch
-            {
-                // TODO: Fix odd whitespace here
-                "♥" => $"\u001b[1;31m{shortSuit}{shortRank}\u001b[0m",
-                "♠" => $"\u001b[1;36m{shortSuit}{shortRank}\u001b[0m",
-                "♦" => $"\u001b[1;7;31m{shortSuit}{shortRank}\u001b[0m",
-                _   => $"\u001b[1;7;36m{shortSuit}{shortRank}\u001b[0m",
-            };
-        }
-
-        public override string ToString()
-        {
-            var shortRank = (Rank) switch
-            {
-                CardRank.Jack => "J",
-                CardRank.Queen => "Q",
-                CardRank.King => "K",
-                CardRank.Ace => "A",
-                _ => ((int)Rank).ToString()
-            };
-
-            // TODO: Fix odd whitespace here
-            var shortSuit = (Suit) switch
-            {
-                CardSuit.Hearts => "♥",
-                CardSuit.Spades => "♠",
-                CardSuit.Diamonds => "♦",
-                _ => "♣"
-            };
-
-
-            return $"{shortRank}{shortSuit}";
-        }
+                _ => throw new Exception($"Cannot convert from card.  Rank not recognised: {this.Rank}.")
+            }
+        ;
     }
 }
