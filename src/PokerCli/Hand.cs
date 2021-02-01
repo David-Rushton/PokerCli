@@ -2,16 +2,22 @@
     ---------------------
     Hand value
     ---------------------
-    10 - Royal flush        value
-     9 - Straight flush     value + high
-     8 - Four of a kind     value + 4 + kicker
-     7 - Full house         value + 3 + 2
-     6 - Flush              value + cards
-     5 - Straight           value + high
-     4 - Three of a Kind    value + three + 2 kickers
-     3 - Two Pairs          value + high pair + low pair + kicker
-     2 - Pair               value + pair + 3 kickers
-     1 - High card          value + 5 kicks
+    10 - Royal flush        seq     value
+     9 - Straight flush     seq     value + high
+     8 - Four of a kind     4+1     value + 4 + kicker
+     7 - Full house         3+2     value + 3 + 2
+     6 - Flush              seq     value + cards
+     5 - Straight           seq     value + high
+     4 - Three of a Kind    3+2     value + three + 2 kickers
+     3 - Two Pairs          22+1    value + high pair + low pair + kicker
+     2 - Pair               2+3     value + pair + 3 kickers
+     1 - High card          seq     value + 5 kicks
+
+        score ==
+        order by
+            count of rank desc
+            rank des
+
     ---------------------
 */
 using PokerCli.Model;
@@ -166,22 +172,6 @@ namespace PokerCli
             ;
         }
 
-
-        private IEnumerable<(Card firstCard, Card secondCard)> Pairs =>
-            from card in _cards
-            join cardRank in GetCardsByRank() on card.Rank equals cardRank.rank
-            where cardRank.count == 2
-            group card by card.Rank.Value into cardRankGroup
-            select (cardRankGroup.First(), cardRankGroup.Last())
-        ;
-
-        private IEnumerable<(Card firstCard, Card secondCard)> FourOfAKind =>
-            from card in _cards
-            join cardRank in GetCardsByRank() on card.Rank equals cardRank.rank
-            where cardRank.count == 4
-            group card by card.Rank.Value into cardRankGroup
-            select (cardRankGroup.First(), cardRankGroup.Last())
-        ;
 
         private IEnumerable<(CardRank rank, int rankValue, int count)> GetCardsByRank() =>
             from card in _cards
