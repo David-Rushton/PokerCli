@@ -42,14 +42,14 @@ namespace PokerCli.Tests
 
         [Theory]
         [InlineData(new [] { "KC", "JC", "9C", "6C", "2C" }, new [] { "KC", "JC", "9C", "6C", "6D", "7H", "2C" }, HandValue.Flush)]
-        [InlineData(new [] { "8C", "7C", "6C", "5C", "3C" }, new [] { "8C", "7C", "6C", "5C", "3C", "2C", "1C" }, HandValue.Flush)]
+        [InlineData(new [] { "8C", "7C", "6C", "5C", "3C" }, new [] { "8C", "7C", "6C", "5C", "3C", "2C", "2D" }, HandValue.Flush)]
         public void Hand_ShouldReturnFlush(string[] expectedCards, string[] allCards, HandValue expectedValue) =>
             TestHandActualMatchesExpectations(expectedCards, allCards, expectedValue)
         ;
 
         [Theory]
-        [InlineData(new [] { "2C", "3C", "4D", "5S", "6H" }, new [] { "5S", "6H", "AH", "3D", "2C", "3C", "4D" }, HandValue.Flush)]
-        [InlineData(new [] { "4H", "5C", "6C", "7D", "8S" }, new [] { "TH", "AS", "5C", "4H", "7D", "6C", "8S" }, HandValue.Flush)]
+        [InlineData(new [] { "2C", "3C", "4D", "5S", "6H" }, new [] { "5S", "6H", "AH", "3D", "2C", "3C", "4D" }, HandValue.Straight)]
+        [InlineData(new [] { "4H", "5C", "6C", "7D", "8S" }, new [] { "TH", "AS", "5C", "4H", "7D", "6C", "8S" }, HandValue.Straight)]
         public void Hand_ShouldReturnStraight(string[] expectedCards, string[] allCards, HandValue expectedValue) =>
             TestHandActualMatchesExpectations(expectedCards, allCards, expectedValue)
         ;
@@ -62,8 +62,8 @@ namespace PokerCli.Tests
         ;
 
         [Theory]
-        [InlineData(new [] { "5H", "5D", "3S", "3H", "7D" }, new [] { "6S", "5H", "5D", "3S", "3H", "7D", "2S" }, HandValue.ThreeOfAKind)]
-        [InlineData(new [] { "9S", "9D", "5S", "5H", "3C" }, new [] { "2D", "9S", "9D", "5S", "5H", "3C", "2C" }, HandValue.ThreeOfAKind)]
+        [InlineData(new [] { "5H", "5D", "3S", "3H", "7D" }, new [] { "6S", "5H", "5D", "3S", "3H", "7D", "2S" }, HandValue.TwoPairs)]
+        [InlineData(new [] { "9S", "9D", "5S", "5H", "3C" }, new [] { "2D", "9S", "9D", "5S", "5H", "3C", "2C" }, HandValue.TwoPairs)]
         public void Hand_ShouldReturnTwoPair(string[] expectedCards, string[] allCards, HandValue expectedValue) =>
             TestHandActualMatchesExpectations(expectedCards, allCards, expectedValue)
         ;

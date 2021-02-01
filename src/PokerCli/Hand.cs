@@ -93,7 +93,7 @@ namespace PokerCli
                 var threeOfAKind = _cards.Where(c => c.Rank == threeRank);
                 var pair = _cards.Where(c => c.Rank == twoRank).Take(2);
 
-                return new BestHand(HandValue.ThreeOfAKind, threeOfAKind.Union(pair));
+                return new BestHand(HandValue.FullHouse, threeOfAKind.Union(pair));
             }
 
 
@@ -104,7 +104,7 @@ namespace PokerCli
                 var pairRank = pairsSorted.First().rank;
                 var hand = _cards.Where(c => c.Rank == threeRank || c.Rank == pairRank);
 
-                return new BestHand(HandValue.ThreeOfAKind, hand);
+                return new BestHand(HandValue.FullHouse, hand);
             }
 
 
@@ -112,7 +112,7 @@ namespace PokerCli
             var greatestSuitByCount = cardsBySuit.OrderByDescending(cbs => cbs.Count).First();
             if(greatestSuitByCount.Count >= 5)
             {
-                var hand = _cards.Where(c => c.Suit == greatestSuitByCount.suit).OrderByDescending(c => c.Rank.Value);
+                var hand = _cards.Where(c => c.Suit == greatestSuitByCount.suit).OrderByDescending(c => c.Rank.Value).Take(5);
                 return new BestHand(HandValue.Flush, hand);
             }
 
@@ -133,7 +133,7 @@ namespace PokerCli
 
 
             // two pairs
-            if(pairsSorted.Count() == 2)
+            if(pairsSorted.Count() >= 2)
             {
                 var bestPair = pairsSorted.First().rank;
                 var nextPair = pairsSorted.Skip(1).First().rank;
@@ -161,7 +161,7 @@ namespace PokerCli
             IEnumerable<Card> AddKickers(IEnumerable<Card> cards, int kickerCount) =>
                 cards.Union
                 (
-                    _cards.Except(cards).OrderBy(c => c.Suit).ThenBy(c => c.Rank.Value).Take(kickerCount)
+                    _cards.Except(cards).OrderByDescending(c => c.Rank.Value).Take(kickerCount)
                 )
             ;
         }
@@ -230,8 +230,8 @@ namespace PokerCli
 
 
             // you cannot build a straight with fewer than 5 cards
-            if(_cards.Count() >= 5)
-                for(var startCard = 0; startCard <= _cards.Count() - 5; startCard++)
+            if(sortedHand.Count() >= 5)
+                for(var startCard = 0; startCard <= sortedHand.Count() - 5; startCard++)
                     for(var i = 1; i < 5; i++)
                     {
                         var lastCard = sortedHand[startCard + i - 1];
