@@ -5,16 +5,13 @@ using System.Diagnostics;
 using System.Linq;
 
 
-namespace PokerCli
+namespace PokerCli.Model
 {
     public record BestHand : IComparable
     {
         public BestHand(HandValue value, IEnumerable<Card> cards)
         {
             Debug.Assert(cards.Count() == 5, "A hand must be comprised of 5 cards");
-
-
-            // 9♣ 9♠ 9♦ 9♥
 
             Value = value;
             Cards = cards;

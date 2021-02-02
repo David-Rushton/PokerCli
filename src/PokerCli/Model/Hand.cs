@@ -27,7 +27,7 @@ using System.Diagnostics;
 using System.Linq;
 
 
-namespace PokerCli
+namespace PokerCli.Model
 {
     public enum HandValue
     {
