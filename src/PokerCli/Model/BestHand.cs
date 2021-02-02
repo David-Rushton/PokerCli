@@ -5,11 +5,11 @@ using System.Diagnostics;
 using System.Linq;
 
 
-namespace PokerCli
+namespace PokerCli.Model
 {
     public record BestHand : IComparable
     {
-        public BestHand(HandValue value, List<Card> cards)
+        public BestHand(HandValue value, IEnumerable<Card> cards)
         {
             Debug.Assert(cards.Count() == 5, "A hand must be comprised of 5 cards");
 
@@ -23,7 +23,7 @@ namespace PokerCli
 
         public int Score { get; init; }
 
-        public List<Card> Cards { get; init; }
+        public IEnumerable<Card> Cards { get; init; }
 
 
         // requires test
@@ -76,7 +76,7 @@ namespace PokerCli
             // multiplying by position ensures high value kickers cannot overwhelm the pair cards.
             foreach(var card in Cards.Reverse<Card>())
             {
-                value += card.RankValue * multiplier;
+                value += card.Rank.Value * multiplier;
                 multiplier *= 100;
             }
 

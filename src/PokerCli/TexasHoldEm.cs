@@ -9,7 +9,7 @@ namespace PokerCli
 {
     public class TexasHoldEm
     {
-        public void Play(Deck deck, Player playerOne, Player playerTwo, HandAssessor assessor)
+        public void Play(Deck deck, Player playerOne, Player playerTwo)
         {
             #region round
 
@@ -39,7 +39,7 @@ namespace PokerCli
             // # win and lose, or draw
 
             PrintRound();
-            assessor.Assess(communityCards.Union(playerOne.Hand).ToList());
+
 
             #endregion
 

@@ -2,16 +2,22 @@
     ---------------------
     Hand value
     ---------------------
-    10 - Royal flush
-     9 - Straight flush
-     8 - Four of a kind             ++ kicker
-     7 - Full house
-     6 - Flush
-     5 - Straight
-     4 - Three of a Kind            ++ kickers
-     3 - Two Pairs                  ++ kicker
-     2 - Pair                       ++ kickers  {200}
-     1 - High card                  ++ kickers  {highest}{}{}{}{lowest}
+    10 - Royal flush        seq     value
+     9 - Straight flush     seq     value + high
+     8 - Four of a kind     4+1     value + 4 + kicker
+     7 - Full house         3+2     value + 3 + 2
+     6 - Flush              seq     value + cards
+     5 - Straight           seq     value + high
+     4 - Three of a Kind    3+2     value + three + 2 kickers
+     3 - Two Pairs          22+1    value + high pair + low pair + kicker
+     2 - Pair               2+3     value + pair + 3 kickers
+     1 - High card          seq     value + 5 kicks
+
+        score ==
+        order by
+            count of rank desc
+            rank des
+
     ---------------------
 */
 using PokerCli.Model;
@@ -21,7 +27,7 @@ using System.Diagnostics;
 using System.Linq;
 
 
-namespace PokerCli
+namespace PokerCli.Model
 {
     public enum HandValue
     {
@@ -93,7 +99,7 @@ namespace PokerCli
                 var threeOfAKind = _cards.Where(c => c.Rank == threeRank);
                 var pair = _cards.Where(c => c.Rank == twoRank).Take(2);
 
-                return new BestHand(HandValue.ThreeOfAKind, threeOfAKind.Union(pair));
+                return new BestHand(HandValue.FullHouse, threeOfAKind.Union(pair));
             }
 
 
@@ -104,7 +110,7 @@ namespace PokerCli
                 var pairRank = pairsSorted.First().rank;
                 var hand = _cards.Where(c => c.Rank == threeRank || c.Rank == pairRank);
 
-                return new BestHand(HandValue.ThreeOfAKind, hand);
+                return new BestHand(HandValue.FullHouse, hand);
             }
 
 
@@ -112,7 +118,7 @@ namespace PokerCli
             var greatestSuitByCount = cardsBySuit.OrderByDescending(cbs => cbs.Count).First();
             if(greatestSuitByCount.Count >= 5)
             {
-                var hand = _cards.Where(c => c.Suit == greatestSuitByCount.suit).OrderByDescending(c => c.RankValue);
+                var hand = _cards.Where(c => c.Suit == greatestSuitByCount.suit).OrderByDescending(c => c.Rank.Value).Take(5);
                 return new BestHand(HandValue.Flush, hand);
             }
 
@@ -133,7 +139,7 @@ namespace PokerCli
 
 
             // two pairs
-            if(pairsSorted.Count() == 2)
+            if(pairsSorted.Count() >= 2)
             {
                 var bestPair = pairsSorted.First().rank;
                 var nextPair = pairsSorted.Skip(1).First().rank;
@@ -154,38 +160,22 @@ namespace PokerCli
 
 
             // high card + 4 kickers, which is the 5 highest cards by rank value
-            return new BestHand(HandValue.HightCard, _cards.OrderByDescending(c => c.RankValue).Take(5));
+            return new BestHand(HandValue.HightCard, _cards.OrderByDescending(c => c.Rank.Value).Take(5));
 
 
 
             IEnumerable<Card> AddKickers(IEnumerable<Card> cards, int kickerCount) =>
                 cards.Union
                 (
-                    _cards.Except(cards).OrderBy(c => c.Suit).ThenBy(c => c.RankValue).Take(kickerCount)
+                    _cards.Except(cards).OrderByDescending(c => c.Rank.Value).Take(kickerCount)
                 )
             ;
         }
 
 
-        private IEnumerable<(Card firstCard, Card secondCard)> Pairs =>
-            from card in _cards
-            join cardRank in GetCardsByRank() on card.Rank equals cardRank.rank
-            where cardRank.count == 2
-            group card by card.RankValue into cardRankGroup
-            select (cardRankGroup.First(), cardRankGroup.Last())
-        ;
-
-        private IEnumerable<(Card firstCard, Card secondCard)> FourOfAKind =>
-            from card in _cards
-            join cardRank in GetCardsByRank() on card.Rank equals cardRank.rank
-            where cardRank.count == 4
-            group card by card.RankValue into cardRankGroup
-            select (cardRankGroup.First(), cardRankGroup.Last())
-        ;
-
         private IEnumerable<(CardRank rank, int rankValue, int count)> GetCardsByRank() =>
             from card in _cards
-            group card by new {rank = card.Rank, rankValue = card.RankValue} into cardRankGroup
+            group card by new {rank = card.Rank, rankValue = card.Rank.Value} into cardRankGroup
             select (cardRankGroup.Key.rank, cardRankGroup.Key.rankValue, cardRankGroup.Count())
         ;
 
@@ -202,7 +192,7 @@ namespace PokerCli
             bestStraight =
                 (
                     from straight in GetStraights()
-                    orderby straight.isRoyal, straight.isFlush, straight.highCard.RankValue descending
+                    orderby straight.isRoyal, straight.isFlush, straight.highCard.Rank.Value descending
                     select straight
                 ).FirstOrDefault()
             ;
@@ -222,7 +212,7 @@ namespace PokerCli
             var sortedHand =
                 (
                     from card in _cards
-                    group card by card.RankValue into cardRankGroup
+                    group card by card.Rank.Value into cardRankGroup
                     orderby cardRankGroup.Key
                     select cardRankGroup.OrderBy(c => c.Suit == favouriteSuit ? -1 : (int)c.Suit).First()
                 ).ToArray()
@@ -230,14 +220,14 @@ namespace PokerCli
 
 
             // you cannot build a straight with fewer than 5 cards
-            if(_cards.Count() >= 5)
-                for(var startCard = 0; startCard <= _cards.Count() - 5; startCard++)
+            if(sortedHand.Count() >= 5)
+                for(var startCard = 0; startCard <= sortedHand.Count() - 5; startCard++)
                     for(var i = 1; i < 5; i++)
                     {
                         var lastCard = sortedHand[startCard + i - 1];
                         var currentCard = sortedHand[startCard + i];
 
-                        if(lastCard.RankValue + 1 != currentCard.RankValue)
+                        if(lastCard.Rank.Value + 1 != currentCard.Rank.Value)
                             break;
 
                         // we found one!
@@ -245,8 +235,8 @@ namespace PokerCli
                         {
                             var straight = sortedHand[new Range(startCard, startCard + 5)];
                             var isFlush = straight.GroupBy(c => c.Suit).Count() == 1;
-                            var isRoyal = isFlush && straight.Last().Rank == CardRank.Ace;
-                            var highCard = straight.OrderBy(c => c.RankValue).Last();
+                            var isRoyal = isFlush && straight.Last().Rank.Symbol == CardRankSymbol.Ace;
+                            var highCard = straight.OrderBy(c => c.Rank.Value).Last();
 
                             yield return (straight, highCard, isFlush, isRoyal);
                         }
