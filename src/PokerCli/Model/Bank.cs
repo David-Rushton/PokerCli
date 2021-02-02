@@ -2,6 +2,7 @@ using PokerCli.Config;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 
 namespace PokerCli.Model
@@ -18,6 +19,12 @@ namespace PokerCli.Model
 
         public decimal Pot { get; private set; }
 
+
+        public IEnumerable<(string playerName, decimal balance)> GetPlayerBalances()
+        {
+            foreach(var (playerName, account) in _playerAccounts)
+                yield return (playerName, account.Balance);
+        }
 
         public void RegisterPlayer(Player player)
         {
@@ -63,8 +70,8 @@ namespace PokerCli.Model
             Debug.Assert(_playerAccounts.ContainsKey(player.Name), $"Cannot {side} player {player.Name}.  Not registered with bank.");
 
             var account = _playerAccounts[player.Name];
-            _playerAccounts[player.Name] = account with { Balance =+ amount };
-            Pot += amount;
+            _playerAccounts[player.Name] = account with { Balance = account.Balance + amount };
+            Pot += amount * -1;
         }
     }
 }
