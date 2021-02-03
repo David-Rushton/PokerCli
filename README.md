@@ -1,6 +1,6 @@
 # Poker Cli
 
-Texas hold 'em in the terminal.
+Texas hold 'em in your terminal.
 
 ## Aims
 
