@@ -9,37 +9,26 @@ namespace PokerCli.Model
 {
     public class Bank
     {
-        readonly BankConfig _bankConfig;
-
-        readonly Dictionary<string, BankAccount> _playerAccounts = new();
+        readonly decimal _playerStartingBalance;
 
 
-        public Bank(BankConfig bankConfig) => (_bankConfig) = (bankConfig);
+        public Bank(BankConfig bankConfig) =>
+            (_playerStartingBalance) = (bankConfig.PlayerStartingBalance)
+        ;
 
 
         public decimal Pot { get; private set; }
 
 
-        public IEnumerable<(string playerName, decimal balance)> GetPlayerBalances()
-        {
-            foreach(var (playerName, account) in _playerAccounts)
-                yield return (playerName, account.Balance);
-        }
+        public void InitialisePlayerBalance(Player player) =>
+            player.Balance = _playerStartingBalance
+        ;
 
-        public void RegisterPlayer(Player player)
+        public void CreditPot(Player player, decimal amount)
         {
-            Debug.Assert( ! _playerAccounts.ContainsKey(player.Name), "Cannot create account.  Player is already registered.");
-
-            _playerAccounts.Add(player.Name, new BankAccount(_bankConfig.PlayerStartingBalance));
-        }
-
-        public bool TryCreditPot(Player player, int amount)
-        {
-            if(_playerAccounts[player.Name].Balance < amount)
-                return false;
+            Debug.Assert(player.Balance > amount, "You cannot bet what you do not have");
 
             DebitPlayerAccount(player, amount);
-            return true;
         }
 
         public void CreditPlayerWithPot(Player player) =>
@@ -66,11 +55,7 @@ namespace PokerCli.Model
 
         private void TransferFundsBetweenPlayerAndPot(Player player, decimal amount)
         {
-            var side = amount > 0 ? "credit" : "debit";
-            Debug.Assert(_playerAccounts.ContainsKey(player.Name), $"Cannot {side} player {player.Name}.  Not registered with bank.");
-
-            var account = _playerAccounts[player.Name];
-            _playerAccounts[player.Name] = account with { Balance = account.Balance + amount };
+            player.Balance += amount;
             Pot += amount * -1;
         }
     }

@@ -14,34 +14,37 @@ namespace PokerCli.Tests
         public void Bank_ShouldCreditPlayerWithStartingBalance()
         {
             var (bank, players) = SetupTest(countOfPlayers: 1, playerStartingBalance: 10);
-            var playerOne = bank.GetPlayerBalances().First();
+            var playerOne = players[0];
 
-            Assert.Equal(10, playerOne.balance);
+            Assert.Equal(10, playerOne.Balance);
         }
 
         [Fact]
         public void Bank_ShouldDebitPlayer()
         {
             var (bank, players) = SetupTest(countOfPlayers: 1, playerStartingBalance: 10);
+            var playerOne = players[0];
 
-            Assert.True(bank.TryCreditPot(players[0], 5));
-            Assert.Equal(5, bank.GetPlayerBalances().First().balance);
-        }
-
-        [Fact]
-        public void Bank_ShouldNotDebitPlayer_WhenPlayerHasInsufficientFunds()
-        {
-            var (bank, players) = SetupTest(countOfPlayers: 1, playerStartingBalance: 10);
-
-            Assert.False(bank.TryCreditPot(players[0], 20));
-            Assert.Equal(10, bank.GetPlayerBalances().First().balance);
+            bank.CreditPot(playerOne, 5);
+            Assert.Equal(5, playerOne.Balance);
         }
 
         [Fact]
         public void Bank_ShouldNotCreditPot_WhenPlayerHasInsufficientFunds()
         {
             var (bank, players) = SetupTest(countOfPlayers: 1, playerStartingBalance: 10);
-            bank.TryCreditPot(players[0], 20);
+
+            // this should throw.
+            // we can swallow this exception.
+            // for this test; we only care about about the final pot balance.
+            try
+            {
+                bank.CreditPot(players[0], 20);
+            }
+            catch
+            {
+                // noop
+            }
 
             Assert.Equal(0, bank.Pot);
         }
@@ -51,7 +54,7 @@ namespace PokerCli.Tests
         {
             var (bank, players) = SetupTest(countOfPlayers: 1, playerStartingBalance: 10);
 
-            bank.TryCreditPot(players[0], 5);
+            bank.CreditPot(players[0], 5);
             Assert.Equal(5, bank.Pot);
         }
 
@@ -60,8 +63,8 @@ namespace PokerCli.Tests
         {
             var (bank, players) = SetupTest(countOfPlayers: 2, playerStartingBalance: 10);
 
-            bank.TryCreditPot(players[0], 5);
-            bank.TryCreditPot(players[1], 5);
+            bank.CreditPot(players[0], 5);
+            bank.CreditPot(players[1], 5);
 
             Assert.Equal(10, bank.Pot);
         }
@@ -71,15 +74,13 @@ namespace PokerCli.Tests
         {
             var (bank, players) = SetupTest(countOfPlayers: 2, playerStartingBalance: 10);
 
-            bank.TryCreditPot(players[0], 2);
-            bank.TryCreditPot(players[1], 2);
+            bank.CreditPot(players[0], 2);
+            bank.CreditPot(players[1], 2);
             bank.CreditPlayerWithPot(players[0]);
 
-            var playerBalances = bank.GetPlayerBalances().ToArray();
-
-            Assert.Equal(2, playerBalances.Length);
-            Assert.Equal(12, playerBalances[0].balance);
-            Assert.Equal(8, playerBalances[1].balance);
+            Assert.Equal(2, players.Length);
+            Assert.Equal(12, players[0].Balance);
+            Assert.Equal(8, players[1].Balance);
             Assert.Equal(0, bank.Pot);
         }
 
@@ -88,15 +89,13 @@ namespace PokerCli.Tests
         {
             var (bank, players) = SetupTest(countOfPlayers: 2, playerStartingBalance: 10);
 
-            bank.TryCreditPot(players[0], 2);
-            bank.TryCreditPot(players[1], 2);
+            bank.CreditPot(players[0], 2);
+            bank.CreditPot(players[1], 2);
             bank.CreditPlayersWithSplitPot(players);
 
-            var playerBalances = bank.GetPlayerBalances().ToArray();
-
-            Assert.Equal(2, playerBalances.Length);
-            Assert.Equal(10, playerBalances[0].balance);
-            Assert.Equal(10, playerBalances[1].balance);
+            Assert.Equal(2, players.Length);
+            Assert.Equal(10, players[0].Balance);
+            Assert.Equal(10, players[1].Balance);
             Assert.Equal(0, bank.Pot);
         }
 
@@ -110,7 +109,7 @@ namespace PokerCli.Tests
             for(var i = 0; i < countOfPlayers; i++)
             {
                 players[i] = new Player($"P{i}");
-                bank.RegisterPlayer(players[i]);
+                bank.InitialisePlayerBalance(players[i]);
             }
 
             return (bank, players);
