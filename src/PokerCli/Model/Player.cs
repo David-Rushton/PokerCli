@@ -11,8 +11,8 @@ namespace PokerCli.Model
         public Player(string name) => (Name) = (name);
 
 
-        public string Name { get; set; }
+        public string Name { get; init; }
 
-        public List<Card> Hand { get; set; } = new();
+        public decimal Balance { get; set; }
     }
 }
