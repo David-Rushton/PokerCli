@@ -3,15 +3,22 @@ using PokerCli.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 
 
 namespace PokerCli.Model
 {
-    public class PlayerBettingAction
+    public class PlayerBettingAction : IBettingAction
     {
-        public void GetSomethingSomething(Player player, decimal highestRaise)
+        readonly IConsoleReader _consoleReader;
+
+
+        public PlayerBettingAction(IConsoleReader consoleReader) => (_consoleReader) = (consoleReader);
+
+
+        public (bettingAction BettingAction, decimal Stake) GetBet(Player player, decimal highestRaise)
         {
             var availableBettingActions = new Dictionary<char, string>('f');
             decimal playerStake = 0;
@@ -32,12 +39,15 @@ namespace PokerCli.Model
             if(player.Balance > highestRaise)
                 availableBettingActions.Add('r', "[R]aise");
 
+            // you can always fold
+            availableBettingActions.Add('f', "[F]old");
+
 
 
 
             var bettingAction = '\0';
             while( ! availableBettingActions.ContainsKey(bettingAction) )
-                bettingAction = Console.ReadKey(false).KeyChar.ToLower();
+                bettingAction = _consoleReader.ReadKey(false).KeyChar.ToLower();
 
 
 
@@ -50,19 +60,19 @@ namespace PokerCli.Model
             {
                 do
                 {
-                    Console.WriteLine("how much?");
-                    var possibleRaise = Console.ReadLine();
+                    Console.WriteLine("how much?");0
+                    var possibleRaise = _consoleReader.ReadLine();
 
                     if(decimal.TryParse(possibleRaise, out playerStake))
                     {
                         // noop
                     }
-                } while( ! (playerStake > highestRaise && playerStake <= player.Balance) )
+                } while( ! (playerStake > highestRaise && playerStake <= player.Balance) );
             }
 
 
 
-            var result =
+            return
                 (
                     PlayerStake: playerStake,
                     HasFolded: bettingAction == 'f' ? true : false

@@ -51,25 +51,26 @@ namespace PokerCli.Model
             {
                 foreach(var player in players.Skip(includeBlind ? 0 : 2))
                 {
+
                     // all in
-                    if(player.Balance == 0)
-                        break;
+                    // if(player.Balance == 0)
+                    //     break;
 
-                    // only possible if highest bet is 0 (in current round)
-                    if(CanCheck(player))
-                        break;
+                    // // only possible if highest bet is 0 (in current round)
+                    // if(CanCheck(player))
+                    //     break;
 
-                    // only possible if highest bet > 0 (in current round)
-                    if(CanCall(player))
-                        break;
+                    // // only possible if highest bet > 0 (in current round)
+                    // if(CanCall(player))
+                    //     break;
 
-                    // only when balance > 0 and < highest bid
-                    if(CanAllIn(player))
-                        break;
+                    // // only when balance > 0 and < highest bid
+                    // if(CanAllIn(player))
+                    //     break;
 
-                    // balance > highest bid
-                    if(CanRaise(player))
-                        break;
+                    // // balance > highest bid
+                    // if(CanRaise(player))
+                    //     break;
 
                     // ([check] || [call]), [raise] || fold
                     // ( check || call || all-in ) [raise] fold
@@ -124,38 +125,38 @@ namespace PokerCli.Model
             )
         ;
 
-        private SelectedBettingAction GetSelectedBettingAction(AvailableBettingActions availableBettingActions)
-        {
+        // private SelectedBettingAction GetSelectedBettingAction(AvailableBettingActions availableBettingActions)
+        // {
 
 
 
-            void PrintPrompt()
-            {
-                var str = new StringBuilder("Place your bet: ");
+        //     void PrintPrompt()
+        //     {
+        //         var str = new StringBuilder("Place your bet: ");
 
-                if(availableBettingActions.CanCheck)
-                    str.Append("[C]heck | ");
+        //         if(availableBettingActions.CanCheck)
+        //             str.Append("[C]heck | ");
 
-                if(availableBettingActions.CanCall)
-                    str.Append("[C]all | ");
+        //         if(availableBettingActions.CanCall)
+        //             str.Append("[C]all | ");
 
-                if(availableBettingActions.CanAllIn)
-                    str.Append("[A]ll In | ");
+        //         if(availableBettingActions.CanAllIn)
+        //             str.Append("[A]ll In | ");
 
-                if(availableBettingActions.CanRaise)
-                    str.Append("[R]aise | ");
+        //         if(availableBettingActions.CanRaise)
+        //             str.Append("[R]aise | ");
 
-                // you can always fold
-                str.Append("[F]old");
+        //         // you can always fold
+        //         str.Append("[F]old");
 
 
-                Console.WriteLine(str.ToString());
-            }
+        //         Console.WriteLine(str.ToString());
+        //     }
 
-            char GetUserSelection()
-            {
+        //     char GetUserSelection()
+        //     {
 
-            }
-        }
+        //     }
+        // }
     }
 }
