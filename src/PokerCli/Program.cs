@@ -21,6 +21,9 @@ namespace PokerCli
         static TexasHoldEm Bootstrap()
         {
             var consoleReader = new ConsoleReader();
+            var aiBettingAction = new AiBettingAction();
+            var playerBettingAction = new PlayerBettingAction(consoleReader);
+            var bettingManager = new BettingManager(playerBettingAction, aiBettingAction);
             var bankConfig = new BankConfig() { PlayerStartingBalance = 100M };
             var bank = new Bank(bankConfig);
             var deck = new Deck();
@@ -32,7 +35,7 @@ namespace PokerCli
                 };
 
 
-            return new TexasHoldEm(bank, deck, players);
+            return new TexasHoldEm(bank, bettingManager, deck, players);
         }
     }
 }

@@ -10,11 +10,24 @@ using System.Text;
 
 namespace PokerCli.Model
 {
-    public class AiBettingAction : IBettingAction
+    public class AiBettingAction : BettingActionBase
     {
-        public (bettingAction BettingAction, decimal Stake) GetBet(Player player, decimal highestRaise)
+        public override (BettingAction BettingAction, decimal Stake) GetBet(Player player, decimal highestRaise)
         {
-            throw new NotImplementedException();
+            var availableBettingActions = GetAvailableBettingActions(player.Balance, highestRaise);
+
+            // todo: repace with something more challenging to play against.
+            // this is just a placeholder.
+
+            if(availableBettingActions.ToList().Exists(ba => ba.bettingAction is BettingAction.Call))
+                return (BettingAction.Call, 0M);
+
+
+            if(availableBettingActions.ToList().Exists(ba => ba.bettingAction is BettingAction.Check))
+                return (BettingAction.Check,highestRaise);
+
+
+            return (BettingAction.Fold, 0M);
         }
     }
 }

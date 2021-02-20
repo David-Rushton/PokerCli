@@ -10,7 +10,7 @@ using System.Text;
 
 namespace PokerCli.Model
 {
-    public class PlayerBettingAction : IBettingAction
+    public class PlayerBettingAction : BettingActionBase
     {
         readonly IConsoleReader _consoleReader;
 
@@ -18,66 +18,68 @@ namespace PokerCli.Model
         public PlayerBettingAction(IConsoleReader consoleReader) => (_consoleReader) = (consoleReader);
 
 
-        public (bettingAction BettingAction, decimal Stake) GetBet(Player player, decimal highestRaise)
+        public override (BettingAction BettingAction, decimal Stake) GetBet(Player player, decimal highestRaise)
         {
-            var availableBettingActions = new Dictionary<char, string>('f');
-            decimal playerStake = 0;
-
-            // can check
-            if(highestRaise == 0)
-                availableBettingActions.Add('c', "[C]heck");
-
-            // can call
-            if(highestRaise > 0 && player.Balance >= highestRaise)
-                availableBettingActions.Add('c', "[C]all");
-
-            // can all in
-            if(highestRaise > 0 && player.Balance < highestRaise)
-                availableBettingActions.Add('a', "[A]ll in");
-
-            // can raise
-            if(player.Balance > highestRaise)
-                availableBettingActions.Add('r', "[R]aise");
-
-            // you can always fold
-            availableBettingActions.Add('f', "[F]old");
+            decimal stake = 0M;
+            var availableBettingActions = base.GetAvailableBettingActions(player.Balance, highestRaise).ToDictionary
+                (
+                    k => k.key,
+                    v => (v.prompt, v.bettingAction)
+                )
+            ;
 
 
-
-
-            var bettingAction = '\0';
-            while( ! availableBettingActions.ContainsKey(bettingAction) )
-                bettingAction = _consoleReader.ReadKey(false).KeyChar.ToLower();
-
+            var flattenPrompt = string.Join(", ", availableBettingActions.Select(aba => aba.Value.prompt));
+            var prompt = $"Available actions: {flattenPrompt}";
+            var bettingAction = GetPlayerResponse(prompt, availableBettingActions.Keys.ToList());
 
 
             // check and call both match the current highest raise.
             // this may be zero, which is ok.
             if(bettingAction == 'c')
-                playerStake = highestRaise;
+                stake = highestRaise;
+
 
             if(bettingAction == 'r')
-            {
-                do
-                {
-                    Console.WriteLine("how much?");0
-                    var possibleRaise = _consoleReader.ReadLine();
-
-                    if(decimal.TryParse(possibleRaise, out playerStake))
-                    {
-                        // noop
-                    }
-                } while( ! (playerStake > highestRaise && playerStake <= player.Balance) );
-            }
-
+                stake = GetPlayerResponse(highestRaise, player.Balance);
 
 
             return
                 (
-                    PlayerStake: playerStake,
-                    HasFolded: bettingAction == 'f' ? true : false
+                    BettingAction: availableBettingActions[bettingAction].bettingAction,
+                    Stake: stake
                 )
             ;
+        }
+
+
+        private char GetPlayerResponse(string prompt, List<char> validResponses)
+        {
+            Console.Write(prompt);
+
+            var response = '\0';
+            do
+            {
+                response = _consoleReader.ReadKey().KeyChar.ToLower();
+            } while ( ! validResponses.Contains(response) );
+
+            return response;
+        }
+
+        private decimal GetPlayerResponse(decimal min, decimal max)
+        {
+            Console.Write($"Place your bet between {min.ToString("N0")} and {max.ToString("N0")}:");
+
+            var response = 0M;
+            do
+            {
+                var input = _consoleReader.ReadLine();
+                if(decimal.TryParse(input, out response))
+                    response = -1;
+
+            } while (response < min && response > max);
+
+            return response;
         }
     }
 }

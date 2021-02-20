@@ -6,12 +6,21 @@ using System.Diagnostics;
 
 namespace PokerCli.Model
 {
-    public class Player
+    public class Player : IEquatable<Player>
     {
         static int _idSeed;
 
         static Dictionary<int, Player> _players = new();
 
+
+        public Player(string name) : this(name, false)
+        { }
+
+        public Player(string name, bool isHuman) : this()
+        {
+            name = Name;
+            isHuman = IsHuman;
+        }
 
         public Player()
         {
@@ -28,13 +37,13 @@ namespace PokerCli.Model
 
         public decimal Balance { get; set; }
 
-        public decimal Wager { get; set; }
+        public decimal Bet { get; set; }
 
         public bool IsHuman { get; init; }
 
         public bool IsDealer { get; private set; }
 
-        public bool IsOut => Balance == 0M && Wager == 0M;
+        public bool IsOut => Balance == 0M && Bet == 0M;
 
         public IEnumerable<Card> HoleCards { get; private set; }
 
@@ -60,5 +69,7 @@ namespace PokerCli.Model
                 select player
             ).FirstOrDefault()
         ;
+
+        public bool Equals(Player? other) => other?.Id == this.Id;
     }
 }

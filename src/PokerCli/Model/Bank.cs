@@ -26,7 +26,7 @@ namespace PokerCli.Model
             player.Balance = _playerStartingBalance
         ;
 
-        public void PlaceWager(Player player, decimal wager)
+        public void PlaceBet(Player player, decimal wager)
         {
             if( ! _playersInPot.ContainsKey(player.Id) )
                 _playersInPot.Add(player.Id, player);
@@ -36,22 +36,22 @@ namespace PokerCli.Model
 
         public void PayWinner(Player player)
         {
-            ClearWagersInPot();
+            ClearBetsInPot();
             CreditPlayerWithPot(player);
         }
 
         public void PayWinners(Player[] players)
         {
-            ClearWagersInPot();
+            ClearBetsInPot();
             CreditPlayersWithSplitPot(players);
         }
 
 
-        private void ClearWagersInPot()
+        private void ClearBetsInPot()
         {
             foreach(var (key, player) in _playersInPot)
             {
-                player.Wager = 0;
+                player.Bet = 0;
                 _playersInPot.Remove(key);
             }
         }
@@ -86,6 +86,7 @@ namespace PokerCli.Model
 
         private void TransferFundsBetweenPlayerAndPot(Player player, decimal amount)
         {
+            player.Bet = amount;
             player.Balance += amount;
             Pot += amount * -1;
         }

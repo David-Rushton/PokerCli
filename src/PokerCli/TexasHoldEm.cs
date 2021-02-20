@@ -11,6 +11,8 @@ namespace PokerCli
     {
         readonly Bank _bank;
 
+        readonly BettingManager _bettingManager;
+
         readonly Deck _deck;
 
         readonly List<Player> _players;
@@ -26,8 +28,8 @@ namespace PokerCli
         ;
 
 
-        public TexasHoldEm(Bank bank, Deck deck, List<Player> players) =>
-            (_bank, _deck, _players) = (bank, deck, players)
+        public TexasHoldEm(Bank bank, BettingManager bettingManager, Deck deck, List<Player> players) =>
+            (_bank, _bettingManager, _deck, _players) = (bank, bettingManager, deck, players)
         ;
 
 
@@ -47,8 +49,8 @@ namespace PokerCli
                 _deck.Shuffle();
 
                 // blind
-                _bank.CreditPot(_players[1], smallBlind);
-                _bank.CreditPot(_players[2], bigBlind);
+                _bank.PlaceBet(_players[1], smallBlind);
+                _bank.PlaceBet(_players[2], bigBlind);
 
                 _players.ForEach(p => p.SetHoleCards(_deck));
 
@@ -56,6 +58,7 @@ namespace PokerCli
                 foreach(var (_, bettingRound) in _bettingRounds)
                 {
                     communityCards.AddRange(_deck.Deal(bettingRound.communityCardsRequired));
+                    _bettingManager.InvokeBettingRound(_bank, _players, bigBlind);
                 }
             }
 
