@@ -14,7 +14,7 @@ namespace PokerCli.Model
             Debug.Assert(cards.Count() == 5, "A hand must be comprised of 5 cards");
 
             Value = value;
-            Cards = cards;
+            Cards = cards.ToList();
             Score = GetScore();
         }
 
@@ -23,23 +23,23 @@ namespace PokerCli.Model
 
         public int Score { get; init; }
 
-        public IEnumerable<Card> Cards { get; init; }
+        public List<Card> Cards { get; init; }
 
 
         // requires test
         // TODO: value is required in check
-        public int CompareTo(object other) =>
+        public int CompareTo(object? other) =>
             (other as BestHand) switch
             {
-                var o when o.Score <  this.Score => -1,
-                var o when o.Score == this.Score =>  0,
-                _                                =>  1
+                var o when o?.Score <  this.Score => -1,
+                var o when o?.Score == this.Score =>  0,
+                _                                 =>  1
             }
         ;
 
         // TODO: value is required in check
-        public virtual bool Equals(BestHand other) =>
-            other.Value == this.Value && other.Score == this.Score
+        public virtual bool Equals(BestHand? other) =>
+            other?.Value == this.Value && other?.Score == this.Score
         ;
 
         // TODO: value is _maybe_ needed here.

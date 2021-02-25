@@ -1,5 +1,6 @@
 ﻿using PokerCli.Config;
 using PokerCli.Model;
+using PokerCli.Views;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -20,9 +21,11 @@ namespace PokerCli
 
         static TexasHoldEm Bootstrap()
         {
+            var gameView = new GameView();
             var consoleReader = new ConsoleReader();
             var aiBettingAction = new AiBettingAction();
             var playerBettingAction = new PlayerBettingAction(consoleReader);
+            var hand = new Hand();
             var bettingManager = new BettingManager(playerBettingAction, aiBettingAction);
             var bankConfig = new BankConfig() { PlayerStartingBalance = 100M };
             var bank = new Bank(bankConfig);
@@ -35,7 +38,7 @@ namespace PokerCli
                 };
 
 
-            return new TexasHoldEm(bank, bettingManager, deck, players);
+            return new TexasHoldEm(gameView, bank, bettingManager, hand, deck, players);
         }
     }
 }

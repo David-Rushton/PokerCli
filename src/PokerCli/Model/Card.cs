@@ -5,22 +5,34 @@ namespace PokerCli.Model
 {
     public record Card(CardRank Rank, CardSuit Suit)
     {
-        const char _suitHearts = '♥';
+        const string TerminalEscapeCode = "\u001b";
 
-        const char _suitSpades = '♠';
+        const string CardBack = "🂠";
 
-        const char _suitDiamonds = '♦';
+        const char SuitHearts = '♥';
 
-        const char _suitClubs = '♣';
+        const char SuitSpades = '♠';
 
+        const char SuitDiamonds = '♦';
+
+        const char SuitClubs = '♣';
+
+
+        public string PrettyPrint(bool facedown) =>
+            facedown
+            ? $"{TerminalEscapeCode}[1;94m{CardBack}{TerminalEscapeCode}[0m"
+            : PrettyPrint()
+        ;
 
         public string PrettyPrint() =>
             string.Format
             (
-                "\u001b[1;{0}{1}{2}\u001b[0m",
+                "{0}[1;{1}{2}{3}{4}[0m",
+                TerminalEscapeCode,
                 GetAnsiSuitColourCode(),
                 ConvertFromRank(),
-                ConvertFromSuit()
+                ConvertFromSuit(),
+                TerminalEscapeCode
             )
         ;
 
@@ -42,10 +54,10 @@ namespace PokerCli.Model
         private char ConvertFromSuit() =>
             (this.Suit) switch
             {
-                CardSuit.Hearts     => _suitHearts,
-                CardSuit.Spades     => _suitSpades,
-                CardSuit.Diamonds   => _suitDiamonds,
-                CardSuit.Clubs      => _suitClubs,
+                CardSuit.Hearts     => SuitHearts,
+                CardSuit.Spades     => SuitSpades,
+                CardSuit.Diamonds   => SuitDiamonds,
+                CardSuit.Clubs      => SuitClubs,
 
                 _ => throw new Exception($"Cannot convert from card.  Suit not recognised: {this.Suit}.")
             }

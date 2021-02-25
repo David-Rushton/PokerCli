@@ -33,22 +33,24 @@ namespace PokerCli.Model
 
         public int Id { get; private set; }
 
-        public string Name { get; init; }
+        public string Name { get; init; } = $"Player #{_idSeed + 1}";
 
         public decimal Balance { get; set; }
 
         public decimal Bet { get; set; }
 
-        public bool IsHuman { get; init; }
+        public bool IsHuman { get; init; } = false;
 
         public bool IsDealer { get; private set; }
 
         public bool IsOut => Balance == 0M && Bet == 0M;
 
-        public IEnumerable<Card> HoleCards { get; private set; }
+        public List<Card> HoleCards { get; private set; } = new List<Card>();
+
+        public BestHand? BestHand { get; set; }
 
 
-        public void SetHoleCards(Deck deck) => HoleCards = deck.Deal(2);
+        public void SetHoleCards(Deck deck) => HoleCards = deck.Deal(2).ToList();
 
         public void SelectAsDealer()
         {
