@@ -41,6 +41,8 @@ namespace PokerCli.Model
 
         public bool IsHuman { get; init; } = false;
 
+        public bool HasFolded { get; set; }
+
         public bool IsDealer { get; private set; }
 
         public bool IsOut => Balance == 0M && Bet == 0M;

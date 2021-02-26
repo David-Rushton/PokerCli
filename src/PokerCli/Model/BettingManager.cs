@@ -28,7 +28,7 @@ namespace PokerCli.Model
 
             do
             {
-                foreach(var player in players)
+                foreach(var player in players.Where(p => p.HasFolded == false))
                 {
                     var bet = GetBettingAction(player);
                     switch (bet.BettingAction)
@@ -49,7 +49,7 @@ namespace PokerCli.Model
                             break;
 
                         case BettingAction.Fold:
-                            players.Remove(player);
+                            player.HasFolded = true;
                             break;
 
                         default:
@@ -61,11 +61,11 @@ namespace PokerCli.Model
 
             bool IsBettingRoundOver()
             {
-                if(players.Count is 0 or 1)
+                if(players.Where(p => p.IsOut == false || p.HasFolded == false).Count() is 1)
                     return true;
 
                 // if everyone has bet the same amount the round is over.
-                if(players.Exists(p => p.Bet < maxBet))
+                if( ! players.Exists(p => p.Bet < maxBet) )
                     return true;
 
                 return false;

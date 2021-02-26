@@ -86,7 +86,7 @@ namespace PokerCli.Model
 
         private void TransferFundsBetweenPlayerAndPot(Player player, decimal amount)
         {
-            player.Bet = amount;
+            player.Bet = amount * -1;
             player.Balance += amount;
             Pot += amount * -1;
         }
